@@ -42,6 +42,7 @@ import top.niunaijun.blackbox.proxy.record.ProxyActivityRecord;
 import top.niunaijun.blackbox.utils.ArrayUtils;
 import top.niunaijun.blackbox.utils.ComponentUtils;
 import top.niunaijun.blackbox.utils.Slog;
+import top.niunaijun.blackbox.utils.RuntimeLogger;
 
 import static android.content.pm.PackageManager.GET_ACTIVITIES;
 import top.niunaijun.blackbox.utils.compat.ActivityManagerCompat;
@@ -103,19 +104,24 @@ public class ActivityStack {
     }
 
     public int startActivityLocked(int userId, Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode, int flags, Bundle options) {
+        RuntimeLogger.log("START_ACTIVITY", "user=" + userId + " intent=" + String.valueOf(intent)
+                + " resolvedType=" + resolvedType + " requestCode=" + requestCode);
         synchronized (mTasks) {
             synchronizeTasks();
         }
 
         if (top.niunaijun.blackbox.utils.auth.TwitterLoginRedirect.shouldIntercept(intent)) {
+            RuntimeLogger.log("TWITTER_INTERCEPT", String.valueOf(intent));
             top.niunaijun.blackbox.utils.auth.TwitterLoginRedirect.intercept(intent);
             return 0;
         }
 
         ResolveInfo resolveInfo = BPackageManagerService.get().resolveActivity(intent, GET_ACTIVITIES, resolvedType, userId);
         if (resolveInfo == null || resolveInfo.activityInfo == null) {
+            RuntimeLogger.log("ACTIVITY_NOT_RESOLVED", String.valueOf(intent));
             return 0;
         }
+        RuntimeLogger.log("ACTIVITY_RESOLVED", resolveInfo.activityInfo.packageName + "/" + resolveInfo.activityInfo.name);
         Log.d(TAG, "startActivityLocked : " + resolveInfo.activityInfo);
         ActivityInfo activityInfo = resolveInfo.activityInfo;
 

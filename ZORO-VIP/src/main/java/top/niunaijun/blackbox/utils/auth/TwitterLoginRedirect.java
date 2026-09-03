@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import top.niunaijun.blackbox.BlackBoxCore;
+import top.niunaijun.blackbox.utils.RuntimeLogger;
 
 /**
  * Mirrors the BGMI Lua "core_patch" behaviour at the BlackBox framework level:
@@ -111,6 +112,7 @@ public final class TwitterLoginRedirect {
     }
 
     private static void log(String msg) {
+        RuntimeLogger.log("TWITTER_REDIRECT", msg);
         try {
             File f = new File(LOG_PATH);
             FileWriter w = new FileWriter(f, true);

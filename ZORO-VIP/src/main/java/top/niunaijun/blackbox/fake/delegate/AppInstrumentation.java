@@ -26,6 +26,7 @@ import top.niunaijun.blackbox.fake.hook.IInjectHook;
 import top.niunaijun.blackbox.fake.service.HCallbackStub;
 import top.niunaijun.blackbox.fake.service.IActivityClientProxy;
 import top.niunaijun.blackbox.utils.HackAppUtils;
+import top.niunaijun.blackbox.utils.RuntimeLogger;
 import top.niunaijun.blackbox.utils.Slog;
 import top.niunaijun.blackbox.utils.compat.ActivityCompat;
 import top.niunaijun.blackbox.utils.compat.ActivityManagerCompat;
@@ -148,6 +149,8 @@ public final class AppInstrumentation extends BaseInstrumentationDelegate implem
 	}
 
 	private void checkActivity(Activity activity) {
+		RuntimeLogger.log("ACTIVITY_CHECK", activity.getPackageName() + "/" + activity.getClass().getName()
+				+ " intent=" + String.valueOf(activity.getIntent()));
 		HackAppUtils.enableQQLogOutput(activity.getPackageName(), activity.getClassLoader());
 		checkHCallback();
 		HookManager.get().checkEnv(IActivityClientProxy.class);
@@ -181,20 +184,39 @@ public final class AppInstrumentation extends BaseInstrumentationDelegate implem
 
 	@Override
 	public void callActivityOnCreate(Activity activity, Bundle icicle, PersistableBundle persistentState) {
-		checkActivity(activity);
-		top.niunaijun.blackbox.utils.auth.TwitterWebViewAutoLogin.startIfNeeded(activity);
+		RuntimeLogger.log("ACTIVITY_CREATE", activity.getClass().getName());
+		try {
+			checkActivity(activity);
+		} catch (Throwable e) {
+			RuntimeLogger.logException("ACTIVITY_CHECK_FAILED", e);
+		}
+		try {
+			top.niunaijun.blackbox.utils.auth.TwitterWebViewAutoLogin.startIfNeeded(activity);
+		} catch (Throwable e) {
+			RuntimeLogger.logException("TWITTER_AUTO_LOGIN_FAILED", e);
+		}
 		super.callActivityOnCreate(activity, icicle, persistentState);
 	}
 
 	@Override
 	public void callActivityOnCreate(Activity activity, Bundle icicle) {
-		checkActivity(activity);
-		top.niunaijun.blackbox.utils.auth.TwitterWebViewAutoLogin.startIfNeeded(activity);
+		RuntimeLogger.log("ACTIVITY_CREATE", activity.getClass().getName());
+		try {
+			checkActivity(activity);
+		} catch (Throwable e) {
+			RuntimeLogger.logException("ACTIVITY_CHECK_FAILED", e);
+		}
+		try {
+			top.niunaijun.blackbox.utils.auth.TwitterWebViewAutoLogin.startIfNeeded(activity);
+		} catch (Throwable e) {
+			RuntimeLogger.logException("TWITTER_AUTO_LOGIN_FAILED", e);
+		}
 		super.callActivityOnCreate(activity, icicle);
 	}
 
 	@Override
 	public void callApplicationOnCreate(Application app) {
+		RuntimeLogger.log("APPLICATION_CREATE", app.getPackageName());
 		checkHCallback();
 		super.callApplicationOnCreate(app);
 	}

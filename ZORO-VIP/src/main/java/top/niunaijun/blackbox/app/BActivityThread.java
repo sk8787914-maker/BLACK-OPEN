@@ -67,6 +67,7 @@ import top.niunaijun.blackbox.core.RNative;
 import top.niunaijun.blackbox.core.env.VirtualRuntime;
 import top.niunaijun.blackbox.core.system.user.BUserHandle;
 import top.niunaijun.blackbox.entity.AppConfig;
+import top.niunaijun.blackbox.utils.RuntimeLogger;
 import top.niunaijun.blackbox.entity.am.ReceiverData;
 import top.niunaijun.blackbox.entity.pm.InstalledModule;
 import top.niunaijun.blackbox.fake.delegate.AppInstrumentation;
@@ -246,9 +247,12 @@ public class BActivityThread extends IBActivityThread.Stub {
     public synchronized void handleBindApplication(String packageName, String processName) {
         if (isInit())
             return;
+        RuntimeLogger.initialize(BlackBoxCore.getContext());
+        RuntimeLogger.log("BIND_APPLICATION", "package=" + packageName + " process=" + processName);
         try {
             CrashHandler.create();
-        } catch (Throwable ignored) {
+        } catch (Throwable handlerFailure) {
+            RuntimeLogger.logException("CRASH_HANDLER_INSTALL_FAILED", handlerFailure);
         }
         Binder.clearCallingIdentity();
         PackageInfo packageInfo = BlackBoxCore.getBPackageManager().getPackageInfo(packageName, PackageManager.GET_PROVIDERS, BActivityThread.getUserId());
@@ -332,6 +336,7 @@ public class BActivityThread extends IBActivityThread.Stub {
             onAfterApplicationOnCreate(packageName, processName, application);
             HookManager.get().checkEnv(HCallbackStub.class);
         } catch (Exception e) {
+            RuntimeLogger.logException("MAKE_APPLICATION_FAILED package=" + packageName, e);
             e.printStackTrace();
             throw new RuntimeException("Unable to makeApplication", e);
         }
