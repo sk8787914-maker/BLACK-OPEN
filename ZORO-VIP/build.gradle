@@ -6,8 +6,8 @@ plugins {
 
 android {
 
-    compileSdkVersion 34
-    buildToolsVersion '34.0.4'
+    compileSdkVersion rootProject.ext.compileSdk
+    buildToolsVersion rootProject.ext.buildTools
 
     aidlPackagedList "android/app/IServiceConnection.aidl"
     aidlPackagedList "android/accounts/IAccountManagerResponse.aidl"
