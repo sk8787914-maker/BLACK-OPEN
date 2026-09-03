@@ -31,14 +31,14 @@ jobs:
       - name: Install Android build dependencies
         run: sdkmanager "platforms;android-34" "build-tools;34.0.0" "ndk;24.0.8215888"
 
-      - name: Build and test
-        run: ./gradlew :ZORO-VIP:testDebugUnitTest :ZORO-VIP:assembleDebug --stacktrace
+      - name: Build tests and release AAR
+        run: ./gradlew :ZORO-VIP:testDebugUnitTest :ZORO-VIP:assembleRelease --stacktrace
 
-      - name: Upload debug AAR
+      - name: Upload release AAR
         uses: actions/upload-artifact@v4
         with:
-          name: black-open-debug-aar
-          path: ZORO-VIP/build/outputs/aar/*.aar
+          name: black-open-release-aar
+          path: ZORO-VIP/build/outputs/aar/*-release.aar
           if-no-files-found: error
 
   release:
@@ -53,7 +53,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: black-open-debug-aar
+          name: black-open-release-aar
           path: release-assets
 
       - name: Publish release
