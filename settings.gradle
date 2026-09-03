@@ -1,0 +1,3 @@
+include ':ZORO-VIP'
+
+rootProject.name = "zoro"
